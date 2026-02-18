@@ -120,16 +120,17 @@ export const DOCUMENTS: Document[] = [
 
   {
     id: "codex-vermelho",
-    slug: "codex-vermelho",
-    title: "Codex Vermelho",
-    subtitle: "Liber Sanguinis",
+    slug: "picatrix",
+    title: "Picatrix",
+    subtitle: "Tratado Hermético das Forças Celestes",
     description:
-      "O registro mais controverso da Ordem. Detalha rituais simbólicos e práticas de transmutação energética. Acesso restrito a Iniciados.",
-    cover: "/images/doc-cover-2.jpg",
+      "Compêndio medieval atribuído aos sábios árabes, o Picatrix revela os fundamentos da magia astrológica, talismãs planetários e operações simbólicas baseadas na harmonia entre mente, cosmos e vontade. Um dos textos mais influentes da tradição esotérica ocidental.",
+    cover: "/covers/picatrix.png",
     category: "conhecimento",
     requiredLevel: "INICIADO",
     readTime: "40 min",
     released: true,
+    pdfUrl: "/pdfs/picatrix.pdf",
     content: [
       "Prefácio\n\nEste codex foi compilado ao longo de sete gerações de mestres da Ordem...",
       "Capítulo I - A Transmutação\n\nA transmutação não é alquimia no sentido literal...",
