@@ -7,22 +7,26 @@ import { Particles } from "@/components/particles"
 export const dynamic = "force-dynamic"
 export const revalidate = 0
 
-export default function ArquivoSlugPage({ params }: { params: { slug: string } }) {
-  const doc = DOCUMENTS.find(
-    (d) => d.id === params.slug || d.slug === params.slug
-  )
+export default async function ArquivoSlugPage({
+  params,
+}: {
+  params: Promise<{ slug: string }>
+}) {
+  const { slug } = await params
+
+  const doc = DOCUMENTS.find((d) => d.id === slug || d.slug === slug)
 
   if (!doc || !doc.released) {
     return (
       <main className="min-h-screen bg-black text-white p-10">
         <h1>DEBUG: documento não encontrado ou não liberado</h1>
-        <p><strong>params:</strong> {JSON.stringify(params)}</p>
-        <pre style={{ whiteSpace: "pre-wrap", marginTop: 20 }}>
-          {DOCUMENTS.map(
-            (d) => `${d.id} | ${d.slug} | released=${d.released}`
-          ).join("\n")}
+        <p>
+          <strong>slug:</strong> {String(slug)}
+        </p>
+        <pre style={{ whiteSpace: "pre-wrap", marginTop: 16 }}>
+          {DOCUMENTS.map((d) => `${d.id} | ${d.slug} | released=${d.released}`).join("\n")}
         </pre>
-        <Link href="/arquivos" style={{ display: "block", marginTop: 20 }}>
+        <Link href="/arquivos" style={{ display: "block", marginTop: 16 }}>
           Voltar
         </Link>
       </main>
@@ -39,15 +43,9 @@ export default function ArquivoSlugPage({ params }: { params: { slug: string } }
 
       <section className="pt-28 pb-10 px-6 max-w-6xl mx-auto">
         <div className="flex flex-col lg:flex-row gap-10">
-          
           {/* Capa */}
           <div className="relative w-full lg:w-1/2 aspect-[3/4] max-h-[600px] overflow-hidden border border-[#1A1A1F]">
-            <Image
-              src={doc.cover}
-              alt={doc.title}
-              fill
-              className="object-cover"
-            />
+            <Image src={doc.cover} alt={doc.title} fill className="object-cover" />
             <div className="absolute inset-0 bg-gradient-to-t from-[#050507]/80 via-transparent to-[#050507]/30" />
           </div>
 
@@ -66,7 +64,7 @@ export default function ArquivoSlugPage({ params }: { params: { slug: string } }
             </p>
 
             {/* Botões */}
-            {pdfUrl && (
+            {pdfUrl ? (
               <div className="flex flex-wrap gap-3">
                 <a
                   href={pdfUrl}
@@ -84,7 +82,7 @@ export default function ArquivoSlugPage({ params }: { params: { slug: string } }
                   Abrir no Leitor
                 </a>
               </div>
-            )}
+            ) : null}
 
             <Link
               href="/arquivos"
