@@ -24,7 +24,30 @@ interface PageProps {
 export default function ArquivoSlugPage({ params }: PageProps) {
   const doc = DOCUMENTS.find((d: any) => d.id === params.slug || d.slug === params.slug)
 
-  if (!doc || !doc.released) return notFound()
+  if (!doc) {
+  return (
+    <main className="min-h-screen bg-black text-white p-10">
+      <h1>DEBUG: doc não encontrado</h1>
+      <p>params.slug: <b>{params.slug}</b></p>
+      <p>slugs disponíveis:</p>
+      <pre style={{ whiteSpace: "pre-wrap" }}>
+        {DOCUMENTS.map(d => `${d.id} | ${d.slug}`).join("\n")}
+      </pre>
+      <Link href="/arquivos">Voltar</Link>
+    </main>
+  )
+}
+
+if (!doc.released) {
+  return (
+    <main className="min-h-screen bg-black text-white p-10">
+      <h1>DEBUG: doc existe mas released=false</h1>
+      <p>id: {doc.id}</p>
+      <p>slug: {doc.slug}</p>
+      <Link href="/arquivos">Voltar</Link>
+    </main>
+  )
+}
 
   const pdfUrl = (doc as any).pdfUrl // esperado: "/pdfs/sao-cipriano.pdf"
   const content = (doc as any).content as string[] | undefined
