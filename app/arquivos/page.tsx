@@ -1,148 +1,46 @@
-"use client"
+import { Suspense } from "react"
+import { supabaseServer } from "@/lib/supabase/server"
+import { ArquivosClient } from "./ArquivosClient"
 
-import { Suspense, useState } from "react"
-import Link from "next/link"
-import Image from "next/image"
-import { useSearchParams } from "next/navigation"
-import { Navbar } from "@/components/navbar"
-import { Particles } from "@/components/particles"
-import { DOCUMENTS, INTENTIONS } from "@/lib/mock-data"
-import { useProgression } from "@/lib/progression-context"
-import { Lock, Clock, ChevronRight } from "lucide-react"
+export const dynamic = "force-dynamic"
+export const revalidate = 0
 
-function ArquivosContent() {
-  const searchParams = useSearchParams()
-  const initialCat = searchParams.get("cat") || "todos"
-  const [activeCategory, setActiveCategory] = useState(initialCat)
-  const { canAccess } = useProgression()
+type UserLevel = "VISITANTE" | "INICIADO" | "ADEPTO" | "CONSELHO 33"
 
-  const categories = [
-    { id: "todos", label: "Todos" },
-    ...INTENTIONS.map((i) => ({ id: i.id, label: i.title })),
-  ]
+export default async function ArquivosPage() {
+  const supabase = supabaseServer()
 
-  const filteredDocs =
-    activeCategory === "todos"
-      ? DOCUMENTS
-      : DOCUMENTS.filter((d) => d.category === activeCategory)
+  // user (se não estiver logado, segue como VISITANTE)
+  const { data: userData } = await supabase.auth.getUser()
+  const userId = userData.user?.id || null
 
-  return (
-    <main className="relative min-h-screen bg-[#050507]">
-      <Particles />
-      <Navbar />
+  let userLevel: UserLevel = "VISITANTE"
 
-      {/* Header */}
-      <section className="pt-28 pb-12 px-6 max-w-6xl mx-auto">
-        <div className="flex items-center gap-2 text-[10px] tracking-[0.2em] text-[#F5F5F5]/20 uppercase mb-8">
-          <Link href="/" className="hover:text-[#B11212] transition-colors duration-500">
-            Portal
-          </Link>
-          <ChevronRight className="w-3 h-3" />
-          <span className="text-[#F5F5F5]/40">Arquivos</span>
-        </div>
+  if (userId) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("level")
+      .eq("id", userId)
+      .maybeSingle()
 
-        <h1 className="font-[var(--font-cinzel)] text-3xl sm:text-4xl tracking-[0.15em] text-[#F5F5F5] mb-4">
-          Arquivos da Ordem
-        </h1>
+    if (profile?.level) userLevel = profile.level
+  }
 
-        <div className="w-16 h-px bg-[#8B0000]/40" />
+  const { data: docs, error } = await supabase
+    .from("documents")
+    .select("id,slug,title,subtitle,description,cover_url,category,required_level,read_time,released")
+    .eq("released", true)
+    .order("created_at", { ascending: false })
 
-        {/* Filtro */}
-        <div className="mt-10 flex flex-wrap gap-3">
-          {categories.map((cat) => (
-            <button
-              key={cat.id}
-              onClick={() => setActiveCategory(cat.id)}
-              className={`px-4 py-2 text-[10px] tracking-[0.2em] uppercase transition-all duration-500 border ${
-                activeCategory === cat.id
-                  ? "border-[#8B0000] text-[#F5F5F5] bg-[#8B0000]/10"
-                  : "border-[#1A1A1F] text-[#F5F5F5]/30 hover:border-[#8B0000]/30 hover:text-[#F5F5F5]/60"
-              }`}
-            >
-              {cat.label}
-            </button>
-          ))}
-        </div>
-      </section>
+  if (error) {
+    return (
+      <main className="min-h-screen bg-[#050507] text-white p-10">
+        <h1>Erro ao carregar documentos</h1>
+        <pre style={{ whiteSpace: "pre-wrap", marginTop: 16 }}>{error.message}</pre>
+      </main>
+    )
+  }
 
-      {/* Grid */}
-      <section className="px-6 pb-20 max-w-6xl mx-auto">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {filteredDocs.map((doc) => {
-            const hasAccess = canAccess(doc.requiredLevel)
-            const disabled = !doc.released || !hasAccess
-
-            return (
-              <Link
-                key={doc.id}
-                href={disabled ? "#" : `/arquivos/${doc.id}`}
-                className={`group relative overflow-hidden border border-[#1A1A1F] bg-[#0B0B10]/60 transition-all duration-700 hover:border-[#8B0000]/30 ${
-                  disabled ? "pointer-events-none opacity-60" : ""
-                }`}
-              >
-                <div className="relative h-52 overflow-hidden">
-                  <Image
-                    src={doc.cover}
-                    alt={doc.title}
-                    fill
-                    className="object-cover transition-transform duration-700 group-hover:scale-105"
-                  />
-
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#0B0B10] via-[#0B0B10]/60 to-transparent" />
-
-                  {!hasAccess && doc.released && (
-                    <div className="absolute top-3 right-3 p-2 bg-[#050507]/80 border border-[#1A1A1F]">
-                      <Lock className="w-3.5 h-3.5 text-[#8B0000]" />
-                    </div>
-                  )}
-
-                  {!doc.released && (
-                    <div className="absolute inset-0 flex items-center justify-center bg-[#050507]/60">
-                      <span className="text-xs tracking-[0.3em] text-[#8B0000]/60 uppercase">
-                        Em Preparação
-                      </span>
-                    </div>
-                  )}
-                </div>
-
-                <div className="p-6">
-                  <p className="text-[10px] tracking-[0.3em] text-[#8B0000] uppercase mb-2">
-                    {doc.subtitle}
-                  </p>
-
-                  <h3 className="font-[var(--font-cinzel)] text-lg text-[#F5F5F5] mb-2">
-                    {doc.title}
-                  </h3>
-
-                  <p className="text-sm text-[#F5F5F5]/30 leading-relaxed line-clamp-2 mb-4">
-                    {doc.description}
-                  </p>
-
-                  <div className="flex items-center justify-between text-xs text-[#F5F5F5]/20">
-                    <div className="flex items-center gap-2">
-                      <Clock className="w-3 h-3" />
-                      {doc.readTime}
-                    </div>
-                    <span className="uppercase">{doc.requiredLevel}</span>
-                  </div>
-                </div>
-              </Link>
-            )
-          })}
-        </div>
-      </section>
-
-      {/* Footer */}
-      <footer className="border-t border-[#1A1A1F] py-8 text-center">
-        <p className="text-[10px] tracking-[0.3em] text-[#F5F5F5]/20 uppercase">
-          Arquivo Arcano — Biblioteca Oculta
-        </p>
-      </footer>
-    </main>
-  )
-}
-
-export default function ArquivosPage() {
   return (
     <Suspense
       fallback={
@@ -151,7 +49,7 @@ export default function ArquivosPage() {
         </main>
       }
     >
-      <ArquivosContent />
+      <ArquivosClient docs={(docs as any) || []} userLevel={userLevel} />
     </Suspense>
   )
 }
