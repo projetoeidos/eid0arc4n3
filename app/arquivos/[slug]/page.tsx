@@ -6,7 +6,7 @@ import Image from "next/image"
 import { useSearchParams } from "next/navigation"
 import { Navbar } from "@/components/navbar"
 import { Particles } from "@/components/particles"
-import { DOCUMENTS, INTENTIONS } from "@/lib/mock-data"
+import { DOCUMENTS, INTENTIONS, getDocHref } from "@/lib/mock-data"
 import { useProgression } from "@/lib/progression-context"
 import { Lock, Clock, ChevronRight } from "lucide-react"
 
@@ -69,12 +69,20 @@ function ArchivesContent() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {filteredDocs.map((doc) => {
             const hasAccess = canAccess(doc.requiredLevel)
+
+            // ✅ novo: destino do card
+            const href = getDocHref(doc)
+
+            // ✅ regra de clique: só entra se released e tem acesso
+            const disabled = !doc.released || !hasAccess
+
             return (
               <Link
                 key={doc.id}
-                href={doc.released ? `/documento/${doc.id}` : "#"}
+                href={disabled ? "#" : href}
+                aria-disabled={disabled}
                 className={`group relative overflow-hidden border border-[#1A1A1F] bg-[#0B0B10]/60 transition-all duration-700 hover:border-[#8B0000]/30 ${
-                  !doc.released ? "pointer-events-none opacity-60" : ""
+                  disabled ? "pointer-events-none opacity-60" : ""
                 }`}
               >
                 <div className="relative h-52 overflow-hidden light-sweep">
@@ -85,11 +93,15 @@ function ArchivesContent() {
                     className="object-cover transition-transform duration-700 group-hover:scale-105"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-[#0B0B10] via-[#0B0B10]/60 to-transparent" />
+
+                  {/* Lock */}
                   {!hasAccess && doc.released && (
                     <div className="absolute top-3 right-3 p-2 bg-[#050507]/80 border border-[#1A1A1F]">
                       <Lock className="w-3.5 h-3.5 text-[#8B0000]" />
                     </div>
                   )}
+
+                  {/* Preparing */}
                   {!doc.released && (
                     <div className="absolute inset-0 flex items-center justify-center bg-[#050507]/60">
                       <span className="font-[var(--font-cinzel)] text-xs tracking-[0.3em] text-[#8B0000]/60 uppercase">
@@ -98,6 +110,7 @@ function ArchivesContent() {
                     </div>
                   )}
                 </div>
+
                 <div className="p-6">
                   <p className="text-[10px] tracking-[0.3em] text-[#8B0000] uppercase mb-2 font-[var(--font-cinzel)]">
                     {doc.subtitle}
@@ -134,11 +147,13 @@ function ArchivesContent() {
 
 export default function ArquivosPage() {
   return (
-    <Suspense fallback={
-      <main className="min-h-screen bg-[#050507] flex items-center justify-center">
-        <div className="w-6 h-6 border border-[#8B0000]/40 rotate-45 animate-pulse" />
-      </main>
-    }>
+    <Suspense
+      fallback={
+        <main className="min-h-screen bg-[#050507] flex items-center justify-center">
+          <div className="w-6 h-6 border border-[#8B0000]/40 rotate-45 animate-pulse" />
+        </main>
+      }
+    >
       <ArchivesContent />
     </Suspense>
   )
