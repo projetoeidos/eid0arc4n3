@@ -54,7 +54,7 @@ export const DOCUMENTS: Document[] = [
     title: "O Manuscrito das Sombras",
     subtitle: "Codex Primordialis",
     description: "Um dos mais antigos registros da Ordem. Contém instruções sobre os primeiros rituais de despertar e as chaves para a percepção além do véu. Este documento foi mantido em segredo por mais de três séculos.",
-    cover: "/images/doc-cover-1.jpg",
+    cover: "/covers/registro-01.webp",
     category: "poder",
     requiredLevel: "VISITANTE",
     readTime: "25 min",
