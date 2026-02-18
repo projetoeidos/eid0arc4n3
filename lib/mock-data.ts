@@ -51,9 +51,9 @@ export const INTENTIONS = [
 export const DOCUMENTS: Document[] = [
   {
     id: "manuscrito-das-sombras",
-    title: "O Manuscrito das Sombras",
-    subtitle: "Codex Primordialis",
-    description: "Um dos mais antigos registros da Ordem. Contém instruções sobre os primeiros rituais de despertar e as chaves para a percepção além do véu. Este documento foi mantido em segredo por mais de três séculos.",
+    title: "São Cipriano: O Livro das Chaves Ocultas",
+    subtitle: "Grimório da Capa Negra",
+    description: "Um dos grimórios mais controversos já preservados nos registros da Ordem. Atribuído a São Cipriano, o Bruxo de Antioquia, este manuscrito reúne rituais, invocações, proteções espirituais e fórmulas que atravessaram séculos sob véu de silêncio. Entre orações, pactos simbólicos e chaves de poder, este códice não é apenas leitura — é portal. Acesso restrito a iniciados.",
     cover: "/covers/registro-01.webp",
     category: "poder",
     requiredLevel: "VISITANTE",
